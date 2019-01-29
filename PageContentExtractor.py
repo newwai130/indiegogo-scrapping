@@ -9,8 +9,8 @@ class PageContentExtractor():
 	def __init__(self):
 
 		option = Options()
-		option.add_argument('--headless')
-		option.add_argument('--log-level=3')
+		#option.add_argument('--headless')
+		#option.add_argument('--log-level=3')
 
 		self.driver = webdriver.Chrome(options=option)
 		self.driver.set_window_size(1920, 800)
@@ -98,7 +98,9 @@ class PageContentExtractor():
 	"""
 
 	def readItemPageInformationFundingType(self, url, project_id):
-		print("start browsing " + str(url))
+		print("start browsing ")
+		print("project id: ", project_id)
+		print("url: ", url)
 		info = {}
 		item_owner_name = ""
 		item_owner_image_url = ""
@@ -126,36 +128,35 @@ class PageContentExtractor():
 			
 			info['url'] = url
 
-			#get product title, the job is handled by the json input data source
-			"""
+			#get product title
 			try:
 				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')
 				item_name_div = item_detail_div.find_element_by_class_name('campaignHeaderBasics-title')
 				item_name = item_name_div.get_attribute("innerText")
-				info['title'] = item_name
+				#info['title'] = item_name
 				print('1.item name: '+item_name)
 			except Exception: 
-				print("retry")
-			"""
+				pass
 
 			#get name of th creater/owner
 			try:		
 				item_owner_name_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsName')
 				item_owner_name = item_owner_name_div.get_attribute("innerText")
-				info['owner_name'] = item_owner_name
-				#print('2.owner name: '+item_owner_name)
+				#info['owner_name'] = item_owner_name
+				print('2. owner name: '+item_owner_name)
 			except Exception: 
 				pass
 
-			#get image of the creater/owner
+			#get image url of the creater/owner
 			try:		
 				item_owner_image_url_div = item_detail_div.find_element_by_class_name('campaignTrust-avatar')
 				item_owner_image_url = item_owner_image_url_div.get_attribute("src")
-				info['owner_image'] = item_owner_image_url
-				#print('3.owner image url: '+item_owner_image_url)
+				#info['owner_image_url'] = item_owner_image_url
+				print('3.owner image url: '+item_owner_image_url)
 			except Exception: 
 				pass
 
+			#download the image of the owner
 			try:
 				if(item_owner_name != "" and item_owner_image_url != ""):
 					owner_image_name = str(project_id) + "_" + item_owner_name
@@ -164,55 +165,59 @@ class PageContentExtractor():
 			except Exception: 
 				pass
 
-			"""
+			#get the amount of total raised fund(1)
 			try:
 				item_rasied_amount_div = self.driver.find_element_by_class_name('indemandProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('3.total raised amount: '+item_rasied_amount)
+				print('4.total raised amount: '+item_rasied_amount)
 			except Exception: 
 				pass
 
+			#get the amount of total raised fund(2)
 			try:
 				item_rasied_amount_div = self.driver.find_element_by_class_name('campaignGoalProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('3.total raised amount: '+item_rasied_amount)
+				print('4.total raised amount: '+item_rasied_amount)
 			except Exception: 
 				pass
 
+			#get the percentage of total raised fund(1)	
 			try:
 				item_rasied_percentage_div = self.driver.find_element_by_class_name('indemandProgress-historyDetails')
 				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
 				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('4.raised percentage: '+item_rasied_percentage+'%')
+				print('5.raised percentage: '+item_rasied_percentage+'%')
 			except Exception: 
 				pass
 			
-
+			#get the percentage of total raised fund(2)	
 			try:
 				item_rasied_percentage_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
 				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
 				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('4.raised percentage: '+item_rasied_percentage+'%')
+				print('5.raised percentage: '+item_rasied_percentage+'%')
 			except Exception: 
 				pass
-			"""
-
 			
+
+			#get target goal of the fund
 			try:
 				item_goal_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
-				#temp_item_goal_div_text = item_goal_div.get_attribute("innerText").encode('UTF-8').replace('\xa0', ' ').decode('UTF-8')
 				temp_item_goal_div_text = item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8')
-				item_goal = item_goal_div.get_attribute("innerText").split(" ")[2]
-				info['owner_image_name'] = item_goal
-			except:
-				traceback.print_exc()
+				#print(item_goal_div.get_attribute("innerText").encode('UTF-8'))
+				#print(item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' '))
+				#rint(item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8'))
+				item_goal = temp_item_goal_div_text.split(" ")[2]
+				info['funds_goal'] = item_goal
+				print('6.fund goal: '+item_goal)
+			except Exception:
 				pass
 			
 				
 		except Exception as e: 
-			print(e)
+			traceback.print_exc()
 		finally:
 			return info
 		
@@ -222,13 +227,14 @@ class PageContentExtractor():
 if __name__ == "__main__":		
 	try:
 		#href = 'https://www.indiegogo.com/projects/pollyanna-publishing#/' 
-		href = 'https://www.indiegogo.com/projects/the-eyal-vilner-big-band-new-swing-album#/'
+		#href = 'https://www.indiegogo.com/projects/the-eyal-vilner-big-band-new-swing-album#/'
+		href = 'https://www.indiegogo.com/projects/re-visions-creating-mosaics-and-economic-opportunity'
 		type = "funding"
 		outputfileName = "testing.png"
 
 		crawler = PageContentExtractor()    
-		#crawler.readingPageInforamtion(href, type, 123)
-		crawler.storeWebToImage(href, outputfileName)
+		crawler.readingPageInforamtion(href, type, 123)
+		#crawler.storeWebToImage(href, outputfileName)
 
 	except Exception as e: 
 		traceback.print_exc()

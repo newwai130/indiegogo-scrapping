@@ -20,14 +20,15 @@ try:
 			info = {}
 			
 			crawlerOutput = crawler.readingPageInforamtion(inputSourc['url'], inputSourc['project_type'], inputSourc['project_id'])
-			
+
 			web_image_name = crawler.storeWebToImage(inputSourc['url'], str(inputSourc['project_id']))
 			info['web_image_name'] = web_image_name
 
 			info.update(inputSourc)
 			info.update(crawlerOutput)
 			
-			fileWriter.writeInfo(info)
+			#fileWriter.writeInfo(info)
+			print("----------------------------------------")
 		except Exception as e: 
 			traceback.print_exc()
 
