@@ -57,7 +57,6 @@ class JSONreader():
 				 
 					output.append(data)
 		print("total valid output from source: ",count)
-		input("press input to continue")
 		return output
 
 	def close(self):

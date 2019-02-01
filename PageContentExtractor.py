@@ -119,7 +119,7 @@ class PageContentExtractor():
 					item_name = item_name_div.get_attribute("innerText")
 					break
 				except Exception: 
-					print("retry, time: ", retry_times)
+					print("retry, time: ", try_times)
 					self.driver.get("http:////www.google.com/")
 					continue
 				finally:
@@ -200,7 +200,7 @@ class PageContentExtractor():
 				info['raisedAmount'] = item_rasied_amount
 				print('5.total raised amount: '+item_rasied_amount)
 			except Exception:
-				isGetAllInformation = False 
+				#isGetAllInformation = False 
 				pass
 
 			#get the amount of total raised fund(2)
@@ -210,7 +210,7 @@ class PageContentExtractor():
 				info['raisedAmount'] = item_rasied_amount
 				print('5.total raised amount: '+item_rasied_amount)
 			except Exception:
-				isGetAllInformation = False 
+				#isGetAllInformation = False 
 				pass
 
 			#get the percentage of total raised fund(1)	
@@ -220,7 +220,7 @@ class PageContentExtractor():
 				info['raisedAmountPercentage'] = item_rasied_percentage
 				print('6.raised percentage: '+item_rasied_percentage+'%')
 			except Exception:
-				isGetAllInformation = False 
+				#isGetAllInformation = False 
 				pass
 			
 			#get the percentage of total raised fund(2)	
@@ -230,7 +230,7 @@ class PageContentExtractor():
 				info['raisedAmountPercentage'] = item_rasied_percentage
 				print('6.raised percentage: '+item_rasied_percentage+'%')
 			except Exception:
-				isGetAllInformation = False 
+				#isGetAllInformation = False 
 				pass
 			
 
