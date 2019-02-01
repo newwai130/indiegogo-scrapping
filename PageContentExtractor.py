@@ -107,6 +107,7 @@ class PageContentExtractor():
 		print("start browsing ")
 		print("project id: ", project_id)
 		print("url: ", url)
+		self.countTotalWebsite += 1
 		info = {}
 		item_owner_name = ""
 		item_owner_image_url = ""
@@ -134,10 +135,10 @@ class PageContentExtractor():
 			"""
 			self.driver.get(url)
 			WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "campaignHeaderBasics")))
-			
+
 			print("start to get field")
 			info['url'] = url
-			self.countTotalWebsite += 1
+			
 			isGetAllInformation = True
 
 			#get product title
@@ -256,7 +257,8 @@ class PageContentExtractor():
 			if(not isGetAllInformation):
 				self.countTotalFailWebsite += 1	
 
-		except Exception as e: 
+		except Exception as e:
+			self.countTotalFailWebsite += 1 
 			traceback.print_exc()
 		finally:
 			print("success rate: ", self.countTotalWebsite - self.countTotalFailWebsite, "/", self.countTotalWebsite)
