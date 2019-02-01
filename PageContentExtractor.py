@@ -11,11 +11,14 @@ class PageContentExtractor():
 		option = Options()
 		#option.add_argument('--headless')
 		#option.add_argument('--log-level=3')
+		#option.add_argument('--incognito')
 
 		self.driver = webdriver.Chrome(options=option)
 		self.driver.set_window_size(1920, 800)
 		self.imageOutputFolder = Path("image")
 		self.imageOutputFolder.mkdir(parents=True, exist_ok=True)
+		self.countTotalWebsite = 0
+		self.countTotalFailWebsite = 0
 		
 	def readingPageInforamtion(self, href, type, project_id):
 		if(type == 'funding'):
@@ -38,12 +41,11 @@ class PageContentExtractor():
 		webPage_height = 1
 
 		
+		#scroll website from top to bottom
 		while (total_scroll_height <= webPage_height):
 			webPage_height  = self.driver.execute_script("return document.body.scrollHeight")
 			self.driver.execute_script("window.scrollBy(0, "+str(window_height)+");")
 			total_scroll_height += window_height
-
-			#print(total_scroll_height)
 			sleep(0.5)
 			
 			
@@ -55,10 +57,10 @@ class PageContentExtractor():
 		if(click_more_buttons and len(click_more_buttons) > 0 and click_more_buttons[0].is_displayed()):
 			click_more_buttons[0].click()
 		
+		#save the owner image
 		body_div = self.driver.find_element_by_xpath("//body")
 		image_name = outputfileName + "_web.png"
 		output_file = self.imageOutputFolder / image_name
-		#body_div.screenshot(str(output_file))
 		element_png = body_div.screenshot_as_png
 		with open(str(output_file), 'wb+') as f:
 			f.write(element_png)
@@ -117,16 +119,18 @@ class PageContentExtractor():
 					item_name = item_name_div.get_attribute("innerText")
 					break
 				except Exception: 
-					print("retry")
+					print("retry, time: ", retry_times)
+					self.driver.get("http:////www.google.com/")
 					continue
 				finally:
 					try_times += 1
 					if(try_times>1):
 						break
-					else:
-						sleep(3)
-			
+						
+			print("start")
 			info['url'] = url
+			self.countTotalWebsite += 1
+			isGetAllInformation = True
 
 			#get product title
 			try:
@@ -135,7 +139,9 @@ class PageContentExtractor():
 				item_name = item_name_div.get_attribute("innerText")
 				#info['title'] = item_name
 				print('1.item name: '+item_name)
-			except Exception: 
+			except Exception:
+				input("unfound title")
+				isGetAllInformation = False 
 				pass
 
 			#get name of th creater/owner
@@ -144,16 +150,28 @@ class PageContentExtractor():
 				item_owner_name = item_owner_name_div.get_attribute("innerText")
 				#info['owner_name'] = item_owner_name
 				print('2. owner name: '+item_owner_name)
-			except Exception: 
+			except Exception:
+				isGetAllInformation = False  
 				pass
 
+			#get location of th creater/owner
+			try:		
+				item_owner_location_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsLocation')
+				item_owner_location = item_owner_name_div.get_attribute("innerText")
+				#info['owner_name'] = item_owner_name
+				print('3 owner location: '+item_owner_name)
+			except Exception:
+				isGetAllInformation = False 
+				pass
+			
 			#get image url of the creater/owner
 			try:		
 				item_owner_image_url_div = item_detail_div.find_element_by_class_name('campaignTrust-avatar')
 				item_owner_image_url = item_owner_image_url_div.get_attribute("src")
 				#info['owner_image_url'] = item_owner_image_url
-				print('3.owner image url: '+item_owner_image_url)
-			except Exception: 
+				print('4.owner image url: '+item_owner_image_url)
+			except Exception:
+				isGetAllInformation = False 
 				pass
 
 			#download the image of the owner
@@ -162,7 +180,17 @@ class PageContentExtractor():
 					owner_image_name = str(project_id) + "_" + item_owner_name
 					self.storeOwnerImage(item_owner_image_url, owner_image_name)
 					info['owner_image_name'] = owner_image_name
-			except Exception: 
+			except Exception:
+				isGetAllInformation = False 
+				pass
+
+			try:
+				if(item_owner_name != "" and item_owner_image_url != ""):
+					owner_image_name = str(project_id) + "_" + item_owner_name
+					self.storeOwnerImage(item_owner_image_url, owner_image_name)
+					info['owner_image_name'] = owner_image_name
+			except Exception:
+				isGetAllInformation = False 
 				pass
 
 			#get the amount of total raised fund(1)
@@ -170,8 +198,9 @@ class PageContentExtractor():
 				item_rasied_amount_div = self.driver.find_element_by_class_name('indemandProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('4.total raised amount: '+item_rasied_amount)
-			except Exception: 
+				print('5.total raised amount: '+item_rasied_amount)
+			except Exception:
+				isGetAllInformation = False 
 				pass
 
 			#get the amount of total raised fund(2)
@@ -179,8 +208,9 @@ class PageContentExtractor():
 				item_rasied_amount_div = self.driver.find_element_by_class_name('campaignGoalProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('4.total raised amount: '+item_rasied_amount)
-			except Exception: 
+				print('5.total raised amount: '+item_rasied_amount)
+			except Exception:
+				isGetAllInformation = False 
 				pass
 
 			#get the percentage of total raised fund(1)	
@@ -188,8 +218,9 @@ class PageContentExtractor():
 				item_rasied_percentage_div = self.driver.find_element_by_class_name('indemandProgress-historyDetails')
 				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
 				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('5.raised percentage: '+item_rasied_percentage+'%')
-			except Exception: 
+				print('6.raised percentage: '+item_rasied_percentage+'%')
+			except Exception:
+				isGetAllInformation = False 
 				pass
 			
 			#get the percentage of total raised fund(2)	
@@ -197,8 +228,9 @@ class PageContentExtractor():
 				item_rasied_percentage_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
 				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
 				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('5.raised percentage: '+item_rasied_percentage+'%')
-			except Exception: 
+				print('6.raised percentage: '+item_rasied_percentage+'%')
+			except Exception:
+				isGetAllInformation = False 
 				pass
 			
 
@@ -206,19 +238,20 @@ class PageContentExtractor():
 			try:
 				item_goal_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
 				temp_item_goal_div_text = item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8')
-				#print(item_goal_div.get_attribute("innerText").encode('UTF-8'))
-				#print(item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' '))
-				#rint(item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8'))
 				item_goal = temp_item_goal_div_text.split(" ")[2]
 				info['funds_goal'] = item_goal
-				print('6.fund goal: '+item_goal)
+				print('7.fund goal: '+item_goal)
 			except Exception:
+				isGetAllInformation = False
 				pass
 			
-				
+			if(not isGetAllInformation):
+				self.countTotalFailWebsite += 1	
+
 		except Exception as e: 
 			traceback.print_exc()
 		finally:
+			print("success rate: ", self.countTotalWebsite - self.countTotalFailWebsite, "/", self.countTotalWebsite)
 			return info
 		
 	def closeDriver(self):
@@ -233,7 +266,8 @@ if __name__ == "__main__":
 		outputfileName = "testing.png"
 
 		crawler = PageContentExtractor()    
-		crawler.readingPageInforamtion(href, type, 123)
+		output = crawler.readingPageInforamtion(href, type, 123)
+		print(output)
 		#crawler.storeWebToImage(href, outputfileName)
 
 	except Exception as e: 

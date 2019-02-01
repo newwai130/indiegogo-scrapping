@@ -3,8 +3,23 @@ from JSONreader import *
 from PageContentExtractor import *
 from pathlib import *
 import traceback
+import configparser
 
-inputFile = Path("input") / "Indiegogo_2018-12-14T10_41_01_757Z.json"
+config = configparser.ConfigParser()
+config.read('Config.ini')
+input_folder_path = Path(config.get('DEFAULT', 'Input_Folder_Directory'))
+output_folder_path = Path(config.get('DEFAULT', 'Output_Folder_Directory'))
+image_folder_path = Path(config.get('DEFAULT', 'Image_Output_Directory'))
+
+"""
+print(str(input_folder_path))
+print(str(output_folder_path))
+print(str(image_folder_path))
+
+input()
+"""
+
+inputFile = Path("input") / "source.json"
 outputFile = Path("output") / "2018-12-14.json"
 
 fileReader = JSONreader(inputFile)
