@@ -1,6 +1,9 @@
 import requests
 from pathlib import *
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 import traceback
@@ -15,6 +18,7 @@ class PageContentExtractor():
 
 		self.driver = webdriver.Chrome(options=option)
 		self.driver.set_window_size(1920, 800)
+		self.driver.implicitly_wait(5)
 		self.imageOutputFolder = Path("image")
 		self.imageOutputFolder.mkdir(parents=True, exist_ok=True)
 		self.countTotalWebsite = 0
@@ -110,6 +114,7 @@ class PageContentExtractor():
 		#re-try 3 times if the web request have no reponse
 		try:
 			
+			"""
 			try_times = 0;
 			while(True):
 				try:
@@ -126,8 +131,11 @@ class PageContentExtractor():
 					try_times += 1
 					if(try_times>1):
 						break
-						
-			print("start")
+			"""
+			self.driver.get(url)
+			WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "campaignHeaderBasics")))
+			
+			print("start to get field")
 			info['url'] = url
 			self.countTotalWebsite += 1
 			isGetAllInformation = True
