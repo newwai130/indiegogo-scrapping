@@ -12,13 +12,12 @@ class PageContentExtractor():
 	def __init__(self):
 
 		option = Options()
-		#option.add_argument('--headless')
-		#option.add_argument('--log-level=3')
-		#option.add_argument('--incognito')
+		option.add_argument('--headless')
+		option.add_argument('--log-level=3')
+		option.add_argument('--incognito')
 
 		self.driver = webdriver.Chrome(options=option)
 		self.driver.set_window_size(1920, 800)
-		self.driver.implicitly_wait(5)
 		self.imageOutputFolder = Path("image")
 		self.imageOutputFolder.mkdir(parents=True, exist_ok=True)
 		self.countTotalWebsite = 0
@@ -115,28 +114,19 @@ class PageContentExtractor():
 		#re-try 3 times if the web request have no reponse
 		try:
 			
-			"""
 			try_times = 0;
 			while(True):
-				try:
-					self.driver.get(url)
-					item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')
-					item_name_div = item_detail_div.find_element_by_class_name('campaignHeaderBasics-title')
-					item_name = item_name_div.get_attribute("innerText")
-					break
-				except Exception: 
-					print("retry, time: ", try_times)
-					self.driver.get("http:////www.google.com/")
-					continue
-				finally:
+				self.driver.get(url)
+				if (len(self.driver.find_elements_by_class_name("i-error-container")) > 0 and try_times <= 5 ):
+					print("retry to load the web page, wait for ", 2*try_times, " seconds")
+					sleep(2*try_times)
 					try_times += 1
-					if(try_times>1):
-						break
-			"""
-			self.driver.get(url)
-			WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "campaignHeaderBasics")))
-
+					continue
+				else:
+					break
+						
 			print("start to get field")
+			
 			info['url'] = url
 			
 			isGetAllInformation = True
@@ -146,6 +136,7 @@ class PageContentExtractor():
 				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')
 				item_name_div = item_detail_div.find_element_by_class_name('campaignHeaderBasics-title')
 				item_name = item_name_div.get_attribute("innerText")
+				#item_name = self.driver.find_element_by_xpath("//meta[@name='sailthru.title']").get_attribute("content")
 				#info['title'] = item_name
 				print('1.item name: '+item_name)
 			except Exception:
@@ -158,7 +149,7 @@ class PageContentExtractor():
 				item_owner_name_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsName')
 				item_owner_name = item_owner_name_div.get_attribute("innerText")
 				#info['owner_name'] = item_owner_name
-				print('2. owner name: '+item_owner_name)
+				print('2.1 owner name: '+item_owner_name)
 			except Exception:
 				isGetAllInformation = False  
 				pass
@@ -168,7 +159,7 @@ class PageContentExtractor():
 				item_owner_location_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsLocation')
 				item_owner_location = item_owner_name_div.get_attribute("innerText")
 				#info['owner_name'] = item_owner_name
-				print('3 owner location: '+item_owner_name)
+				print('2.2 owner location: '+item_owner_name)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -178,12 +169,22 @@ class PageContentExtractor():
 				item_owner_image_url_div = item_detail_div.find_element_by_class_name('campaignTrust-avatar')
 				item_owner_image_url = item_owner_image_url_div.get_attribute("src")
 				#info['owner_image_url'] = item_owner_image_url
-				print('4.owner image url: '+item_owner_image_url)
+				print('2.3 owner image url: '+item_owner_image_url)
+			except Exception:
+				isGetAllInformation = False 
+				pass
+
+			#get image url of the creater/owner
+			try:		
+				item_project_date = self.driver.find_element_by_xpath("//meta[@name='sailthru.date']").get_attribute("content")
+				#info['project_date'] = item_project_date
+				print('3. project date: '+item_project_date)
 			except Exception:
 				isGetAllInformation = False 
 				pass
 
 			#download the image of the owner
+			"""
 			try:
 				if(item_owner_name != "" and item_owner_image_url != ""):
 					owner_image_name = str(project_id) + "_" + item_owner_name
@@ -201,6 +202,7 @@ class PageContentExtractor():
 			except Exception:
 				isGetAllInformation = False 
 				pass
+			"""
 
 			#get the amount of total raised fund(1)
 			try:
@@ -222,6 +224,16 @@ class PageContentExtractor():
 				#isGetAllInformation = False 
 				pass
 
+			#get the percentage of total raised fund	
+			try:
+				item_rasied_percentage = self.driver.find_element_by_xpath("//meta[@name='sailthru.displayed_pct_funded']").get_attribute("content")
+				#info['raisedAmountPercentage'] = item_rasied_percentage
+				print('6.raised percentage: '+item_rasied_percentage+'%')
+			except Exception:
+				#isGetAllInformation = False 
+				pass	
+
+			"""
 			#get the percentage of total raised fund(1)	
 			try:
 				item_rasied_percentage_div = self.driver.find_element_by_class_name('indemandProgress-historyDetails')
@@ -241,6 +253,7 @@ class PageContentExtractor():
 			except Exception:
 				#isGetAllInformation = False 
 				pass
+			"""
 			
 
 			#get target goal of the fund
@@ -258,6 +271,7 @@ class PageContentExtractor():
 				self.countTotalFailWebsite += 1	
 
 		except Exception as e:
+			input("error found, please press enter")
 			self.countTotalFailWebsite += 1 
 			traceback.print_exc()
 		finally:
