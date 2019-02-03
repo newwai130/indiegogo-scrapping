@@ -133,10 +133,10 @@ class PageContentExtractor():
 
 			#get product title
 			try:
-				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')
-				item_name_div = item_detail_div.find_element_by_class_name('campaignHeaderBasics-title')
-				item_name = item_name_div.get_attribute("innerText")
-				#item_name = self.driver.find_element_by_xpath("//meta[@name='sailthru.title']").get_attribute("content")
+				#item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')
+				#item_name_div = item_detail_div.find_element_by_class_name('campaignHeaderBasics-title')
+				#item_name = item_name_div.get_attribute("innerText")
+				item_name = self.driver.find_element_by_xpath("//meta[@name='sailthru.title']").get_attribute("content")
 				#info['title'] = item_name
 				print('1.item name: '+item_name)
 			except Exception:
@@ -144,12 +144,31 @@ class PageContentExtractor():
 				isGetAllInformation = False 
 				pass
 
+			#get product type
+			try:
+				item_type = self.driver.find_element_by_xpath("//meta[@name='sailthru.displayed_category']").get_attribute("content")
+				#info['type'] = item_type
+				print('2.item type: '+item_type)
+			except Exception:
+				isGetAllInformation = False 
+				pass
+
+			#get creattion date
+			try:
+				item_creattion_date = self.driver.find_element_by_xpath("//meta[@name='sailthru.date']").get_attribute("content")
+				#info['creattion_date'] = item_creattion_date
+				print('3.creation date: '+item_creattion_date)
+			except Exception:
+				isGetAllInformation = False 
+				pass
+
 			#get name of th creater/owner
-			try:		
+			try:
+				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')		
 				item_owner_name_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsName')
 				item_owner_name = item_owner_name_div.get_attribute("innerText")
 				#info['owner_name'] = item_owner_name
-				print('2.1 owner name: '+item_owner_name)
+				print('4 owner name: '+item_owner_name)
 			except Exception:
 				isGetAllInformation = False  
 				pass
@@ -159,7 +178,7 @@ class PageContentExtractor():
 				item_owner_location_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsLocation')
 				item_owner_location = item_owner_name_div.get_attribute("innerText")
 				#info['owner_name'] = item_owner_name
-				print('2.2 owner location: '+item_owner_name)
+				print('5 owner location: '+item_owner_name)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -169,7 +188,7 @@ class PageContentExtractor():
 				item_owner_image_url_div = item_detail_div.find_element_by_class_name('campaignTrust-avatar')
 				item_owner_image_url = item_owner_image_url_div.get_attribute("src")
 				#info['owner_image_url'] = item_owner_image_url
-				print('2.3 owner image url: '+item_owner_image_url)
+				print('6 owner image url: '+item_owner_image_url)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -178,7 +197,7 @@ class PageContentExtractor():
 			try:		
 				item_project_date = self.driver.find_element_by_xpath("//meta[@name='sailthru.date']").get_attribute("content")
 				#info['project_date'] = item_project_date
-				print('3. project date: '+item_project_date)
+				print('7. project date: '+item_project_date)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -209,7 +228,7 @@ class PageContentExtractor():
 				item_rasied_amount_div = self.driver.find_element_by_class_name('indemandProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('5.total raised amount: '+item_rasied_amount)
+				print('8.total raised amount: '+item_rasied_amount)
 			except Exception:
 				#isGetAllInformation = False 
 				pass
@@ -219,7 +238,7 @@ class PageContentExtractor():
 				item_rasied_amount_div = self.driver.find_element_by_class_name('campaignGoalProgress-raisedAmount')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
 				info['raisedAmount'] = item_rasied_amount
-				print('5.total raised amount: '+item_rasied_amount)
+				print('8.total raised amount: '+item_rasied_amount)
 			except Exception:
 				#isGetAllInformation = False 
 				pass
@@ -228,7 +247,7 @@ class PageContentExtractor():
 			try:
 				item_rasied_percentage = self.driver.find_element_by_xpath("//meta[@name='sailthru.displayed_pct_funded']").get_attribute("content")
 				#info['raisedAmountPercentage'] = item_rasied_percentage
-				print('6.raised percentage: '+item_rasied_percentage+'%')
+				print('9.raised percentage: '+item_rasied_percentage)
 			except Exception:
 				#isGetAllInformation = False 
 				pass	
@@ -262,7 +281,7 @@ class PageContentExtractor():
 				temp_item_goal_div_text = item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8')
 				item_goal = temp_item_goal_div_text.split(" ")[2]
 				info['funds_goal'] = item_goal
-				print('7.fund goal: '+item_goal)
+				print('10.fund goal: '+item_goal)
 			except Exception:
 				isGetAllInformation = False
 				pass
