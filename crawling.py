@@ -17,9 +17,9 @@ def main():
 	inputFile	= input_folder_path / Path(config.get('DEFAULT', 'Input_File_Name'))
 	outputFile 	= output_folder_path / Path(config.get('DEFAULT', 'Output_File_Name'))
 
-	print(str(inputFile))
-	print(str(outputFile))
-	print(str(image_folder_path))
+	print("json input file: ", str(inputFile))
+	print("json output file: ", str(outputFile))
+	print("image output folder: ", str(image_folder_path))
 
 	fileReader = JSONreader(inputFile)
 	fileWriter = JSONwriter(outputFile)
