@@ -156,7 +156,7 @@ class PageContentExtractor():
 			try:
 				item_creattion_date = self.driver.find_element_by_xpath("//meta[@name='sailthru.date']").get_attribute("content")
 				info['project_create_date'] = item_creattion_date
-				print('3.project_date: '+item_creattion_date)
+				print('3.project_start_date: '+item_creattion_date)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -165,7 +165,7 @@ class PageContentExtractor():
 			try:
 				item_expire_date = self.driver.find_element_by_xpath("//meta[@name='sailthru.expire_date']").get_attribute("content")
 				info['project_expire_date'] = item_expire_date
-				print('4.project_date: '+item_expire_date)
+				print('4.project_end_date: '+item_expire_date)
 			except Exception:
 				isGetAllInformation = False 
 				pass
@@ -184,24 +184,24 @@ class PageContentExtractor():
 
 			#get location of th creater/owner
 			try:
-				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')		
-				item_owner_location_div = item_detail_div.find_element_by_class_name('campaignTrust-detailsLocation')
+				item_owner_location_div = self.driver.find_element_by_class_name('basicsCampaignOwner-details-city')
 				item_owner_location = item_owner_location_div.get_attribute("innerText")
-				info['owner_location'] = item_owner_name
-				print('6 owner location: '+item_owner_name)
-			except Exception:
+				info['owner_location'] = item_owner_location
+				print('6 owner location: '+ item_owner_location)
+			except Exception as e:
 				isGetAllInformation = False 
+				print(traceback.format_exc())
 				pass
 			
 			#get image url of the creater/owner
 			try:
-				item_detail_div = self.driver.find_element_by_class_name('campaignHeaderBasics')		
-				item_owner_image_url_div = item_detail_div.find_element_by_class_name('campaignTrust-avatar')
+				item_owner_image_url_div = self.driver.find_element_by_class_name('campaignTrust-avatar').find_element_by_tag_name('img')
 				item_owner_image_url = item_owner_image_url_div.get_attribute("src")
 				info['owner_image_url'] = item_owner_image_url
-				print('7 owner image url: '+item_owner_image_url)
-			except Exception:
+				print('7 owner image url: '+str(item_owner_image_url))
+			except Exception as e:
 				isGetAllInformation = False 
+				print(traceback.format_exc())
 				pass
 
 			#download the image of the owner
@@ -218,13 +218,20 @@ class PageContentExtractor():
 		
 			#get the amount of total raised fund(1)
 			try:
-				item_rasied_amount_div = self.driver.find_element_by_class_name('indemandProgress-raisedAmount')
+				item_rasied_amount_div = self.driver.find_element_by_class_name('basicsGoalProgress-amountSold')
 				item_rasied_amount = item_rasied_amount_div.get_attribute("innerText")
+
+				item_rasied_amount_currency_div = self.driver.find_element_by_class_name('basicsGoalProgress-raisedCurrency')
+				item_rasied_amount_currency = item_rasied_amount_currency_div.get_attribute("innerText")
+
 				info['raisedAmount'] = item_rasied_amount
-				print('9.total raised amount: '+item_rasied_amount)
+				info['currency'] = item_rasied_amount_currency
+				print('9.total raised amount: '+item_rasied_amount+" "+item_rasied_amount_currency)
 			except Exception:
 				pass
 
+
+			"""
 			#get the amount of total raised fund(2)
 			try:
 				item_rasied_amount_div = self.driver.find_element_by_class_name('campaignGoalProgress-raisedAmount')
@@ -233,6 +240,8 @@ class PageContentExtractor():
 				print('9.total raised amount: '+item_rasied_amount)
 			except Exception:
 				pass
+			"""
+
 
 			#get the percentage of total raised fund	
 			try:
@@ -240,34 +249,12 @@ class PageContentExtractor():
 				info['raisedAmountPercentage'] = item_rasied_percentage
 				print('10.raised percentage: '+item_rasied_percentage)
 			except Exception:
-				pass	
-
-			"""
-			#get the percentage of total raised fund(1)	
-			try:
-				item_rasied_percentage_div = self.driver.find_element_by_class_name('indemandProgress-historyDetails')
-				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
-				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('6.raised percentage: '+item_rasied_percentage+'%')
-			except Exception:
-				#isGetAllInformation = False 
 				pass
-			
-			#get the percentage of total raised fund(2)	
-			try:
-				item_rasied_percentage_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
-				item_rasied_percentage = item_rasied_percentage_div.get_attribute("innerText").split('%')[0]
-				info['raisedAmountPercentage'] = item_rasied_percentage
-				print('6.raised percentage: '+item_rasied_percentage+'%')
-			except Exception:
-				#isGetAllInformation = False 
-				pass
-			"""
-			
 
+			
 			#get target goal of the fund
 			try:
-				item_goal_div = self.driver.find_element_by_class_name('campaignGoalProgress-detailsGoal')
+				item_goal_div = self.driver.find_element_by_class_name('basicsGoalProgress-progressDetails-detailsGoal')
 				temp_item_goal_div_text = item_goal_div.get_attribute("innerText").encode('UTF-8').replace(b'\xc2\xa0', b' ').decode('UTF-8')
 				item_goal = temp_item_goal_div_text.split(" ")[2]
 				info['funds_goal'] = item_goal
@@ -275,7 +262,8 @@ class PageContentExtractor():
 			except Exception:
 				isGetAllInformation = False
 				pass
-			
+
+
 			if(not isGetAllInformation):
 				self.countTotalFailWebsite += 1	
 
